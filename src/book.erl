@@ -8,10 +8,10 @@ open() -> application:start(book).
 
 close() -> application:stop(book).
 
-write_page(Draft) ->
+%%write_page(Draft) ->
 
-delete_page(Draft) ->
+%%delete_page(Draft) ->
 
-publish_page(Draft) ->
+%%publish_page(Draft) ->
 
-unpublish_page(Draft) ->
+%%unpublish_page(Draft) ->
