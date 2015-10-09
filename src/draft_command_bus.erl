@@ -21,4 +21,3 @@ send_command(Command) ->
 
 publish_event(Event) ->
   gen_event:notify(?SERVER, Event).
-

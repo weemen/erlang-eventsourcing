@@ -22,10 +22,10 @@ init([]) ->
 %% handle_event(#unpublish_draft{id=Id}, State) ->
 
 handle_event(_, State) ->
-    {ok, State}.
+  {ok, State}.
 
 handle_call(_, State) ->
-    {ok, State}.
+  {ok, State}.
 
 handle_info(_, State) ->
-    {ok, State}.
+  {ok, State}.

@@ -1,3 +1,5 @@
+-author("weemen").
+
 %%commands for command handler
 -record(write_new_draft, {id} ).
 
