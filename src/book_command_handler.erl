@@ -28,4 +28,4 @@ handle_call(_, State) ->
     {ok, State}.
 
 handle_info(_, State) ->
-    {ok, State}
+    {ok, State}.
