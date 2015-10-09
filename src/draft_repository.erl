@@ -1,4 +1,4 @@
--module(book_repository).
+-module(draft_repository).
 
 -export([get_by_id/1, save/1, add_to_cache/1, remove_from_cache]).
 

@@ -1,4 +1,4 @@
--module(book_command_bus).
+-module(draft_command_bus).
 -author("weemen").
 
 %% API

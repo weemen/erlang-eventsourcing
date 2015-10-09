@@ -1,4 +1,4 @@
--module(book_command_handler).
+-module(draft_command_handler).
 -author("weemen").
 
 %% API
@@ -7,10 +7,10 @@
 -include("commands.hrl").
 
 add_handler() ->
-  book_command_bus:add_handler(?MODULE, []).
+  draft_command_bus:add_handler(?MODULE, []).
 
 delete_handler() ->
-  book_command_bus:delete_handler(?MODULE, []).
+  draft_command_bus:delete_handler(?MODULE, []).
 
 init([]) ->
   {ok, []}.
