@@ -5,4 +5,5 @@
               {applications,[kernel,stdlib]},
               {mod,{blog_app,[]}},
               {env,[]},
-              {modules,[blog_app,blog_sup]}]}.
+              {modules,[blog,blog_app,blog_sup,command_bus,command_handler,
+                        draft,event_handler,event_store,keypid,repository]}]}.
