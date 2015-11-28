@@ -16,7 +16,7 @@ get_by_id(Id) ->
 
 save(Pid) ->
   Saver = fun(Id, Events) ->
-    event_store:append_events(Id, Events) end,
+    event_store:append_events(Events) end,
     draft:process_unsaved_changes(Pid, Saver).
 
 load_from_event_store(Id) ->
