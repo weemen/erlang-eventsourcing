@@ -10,7 +10,21 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    blog_sup:start_link().
+    event_store:init(),
+%%    read_store:init(),
+    keypid:init(),
+
+    case blog_sup:start_link() of
+        {ok, Pid} ->
+            io:fwrite("supervisor started\n"),
+            command_handler:add_handler(),
+%%            event_handler:add_handler(),
+            io:fwrite("handler added to command handler\n"),
+            {ok, Pid};
+        Other ->
+            io:fwrite("Couldn't start supervisor\n"),
+            {error, Other}
+    end.
 
 stop(_State) ->
     ok.
