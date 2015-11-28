@@ -52,21 +52,34 @@ loop(#state{id=Id}=State) ->
   end.
 
 attempt_command({make_new_draft, Id}, State) ->
-  Event = #new_draft_made{id=Id, date_created=erlang:localtime()},
-  apply_new_event( Event, State);
+  {{Year,Month,Day},{Hour,Min,Sec}} = erlang:localtime(),
+  DateTime = lists:flatten(
+    io_lib:format("~4.10.0B-~2.10.0B-~2.10.0B ~2.10.0B:~2.10.0B:~2.10.0B", [Year, Month, Day, Hour, Min, Sec])
+  ),
+
+  Event = #new_draft_made{id=Id, date_created=DateTime},
+  apply_new_event(Event, State);
 
 attempt_command(Command, State) ->
   error_logger:warn_msg("attempt_command for unexpected command (~p)~n", [Command]),
   State.
 
 apply_new_event(Event, State) ->
-  NewState = apply_event(Event, State),
-  CombinedChanges = [Event] ++ NewState#state.changes,
+  EventState      = apply_event(Event, State),
+  NewState        = element(1,EventState),
+  EventRecord     = element(2,EventState),
+
+  CombinedChanges = [EventRecord] ++ NewState#state.changes,
   NewState#state{changes=CombinedChanges}.
 
 apply_event(#new_draft_made{id=Id,date_created=DateCreated}, State) ->
   repository:add_to_cache(Id),
-  State#state{id=Id, date_created=DateCreated};
+
+  Map       = #{"id"=>Id, "event_name"=>"new_draft_made", "event"=>#{<<"id">>=>list_to_binary(Id),<<"date_created">>=>list_to_binary(DateCreated)}},
+  {
+    State#state{id=Id, date_created=DateCreated},
+    Map
+  };
 
 apply_event(_Event, State)->
   State. % For some events, we don't have state to mutate
