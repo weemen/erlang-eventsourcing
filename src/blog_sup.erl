@@ -23,5 +23,8 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, []} }.
+    SupervisorFlags = {one_for_one, 5, 10},
+    BlogWorker          = {blog, {blog, start, [[]]}, permanent, 2000, worker, []},
+    CommandBusWorker    = ?CHILD(command_bus, worker),
+    {ok, { SupervisorFlags, [CommandBusWorker, BlogWorker]} }.
 
