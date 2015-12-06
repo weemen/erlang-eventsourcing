@@ -8,6 +8,7 @@ add_to_cache(Id) ->
 remove_from_cache(Id) ->
   keypid:delete(Id).
 
+%%TODO fix caching - new events will always retrieved from mysql now
 get_by_id(Id) ->
   case keypid:get(Id) of
     not_found -> load_from_event_store(Id);
