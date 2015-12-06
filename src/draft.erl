@@ -115,6 +115,7 @@ apply_many_events([Event|Rest], State) ->
       {_,Id}          = maps:find(<<"id">>,EventAsMap),
       {_,DateCreated} = maps:find(<<"date_created">>,EventAsMap),
 
+      repository:add_to_cache(binary_to_list(Id)),
       NewState = State#state{id=binary_to_list(Id), date_created=binary_to_list(DateCreated)};
 
     {ok, <<"title_of_draft_refined">>} ->
