@@ -32,7 +32,7 @@ append_events(Events) ->
         ])
     ),
 
-    io:fwrite("Mysql: INSERT INTO events SET uuid = ~p, event = '~s', event_name = ~p, processed_date = ~p", [
+    io:fwrite("Mysql: INSERT INTO events SET uuid = ~p, event = '~s', event_name = ~p, processed_date = ~p~n", [
       maps:get("id", EventRecord),
       jiffy:encode(maps:get("event", EventRecord)),
       maps:get("event_name", EventRecord),
@@ -59,5 +59,5 @@ get_events(Id) ->
   ),
 
   Proplist=emysql_util:as_json(Result),
-  io:fwrite("~p",[Proplist]),
+%%  io:fwrite("~p",[Proplist]),
   Proplist.
