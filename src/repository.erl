@@ -8,11 +8,14 @@ add_to_cache(Id) ->
 remove_from_cache(Id) ->
   keypid:delete(Id).
 
-%%TODO fix caching - new events will always retrieved from mysql now
 get_by_id(Id) ->
   case keypid:get(Id) of
-    not_found -> load_from_event_store(Id);
-    Pid -> {ok, Pid}
+    not_found ->
+      io:fwrite("process not found loading events from event store!~n"),
+      load_from_event_store(Id);
+    Pid ->
+      io:fwrite("process found, sending back PID~n"),
+      {ok, Pid}
   end.
 
 save(Pid) ->
