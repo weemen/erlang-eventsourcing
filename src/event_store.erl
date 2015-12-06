@@ -5,7 +5,7 @@
 %% automatic garbage collection for ets tables.
 -include("blog_data_structures.hrl").
 
--export([init/0,get_events/1,append_events/1, delete/1]).
+-export([init/0,get_events/1,append_events/1]).
 -define(TABLE_ID, ?MODULE).
 
 init() ->
@@ -32,6 +32,13 @@ append_events(Events) ->
         ])
     ),
 
+    io:fwrite("Mysql: INSERT INTO events SET uuid = ~p, event = '~s', event_name = ~p, processed_date = ~p", [
+      maps:get("id", EventRecord),
+      jiffy:encode(maps:get("event", EventRecord)),
+      maps:get("event_name", EventRecord),
+      DateTime
+    ]),
+
     emysql:execute(
       erlang_es_blog,
       Query
@@ -39,14 +46,18 @@ append_events(Events) ->
     command_bus:publish_event(maps:get("event", EventRecord)) end, NewEvents
   ).
 
-get_events(Key) ->
-  lists:reverse(get_raw_events(Key)).
+get_events(Id) ->
+  Query = erlang:iolist_to_binary(
+    io_lib:format("SELECT * FROM events WHERE uuid = ~p ORDER BY processed_date ASC", [
+      Id
+    ])
+  ),
 
-delete(Key) ->
-  ets:delete(?TABLE_ID, Key).
+  Result = emysql:execute(
+    erlang_es_blog,
+    Query
+  ),
 
-get_raw_events(Key) ->
-  case ets:lookup(?TABLE_ID, Key) of
-    [{Key, Events}] -> Events;
-    [] -> []
-  end.
+  Proplist=emysql_util:as_json(Result),
+  io:fwrite("~p",[Proplist]),
+  Proplist.
