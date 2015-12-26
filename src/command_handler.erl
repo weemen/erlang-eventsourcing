@@ -86,6 +86,17 @@ handle_event(#renew_draft{id=Id}, State) ->
       {ok, State}
   end;
 
+handle_event(#hide_draft{id=Id}, State) ->
+  case repository:get_by_id(Id) of
+    not_found ->
+      handle_not_found(Id, State);
+    {ok,Pid} ->
+      io:fwrite("Id: ~s found!!\n", [Id]),
+      draft:hide_draft(Pid),
+      repository:save(Pid),
+      {ok, State}
+  end;
+
 handle_event(_, State) ->
 	{ok, State}.
 

@@ -7,12 +7,13 @@
   refine_content_of_draft/2,
   publish_draft/1,
   unpublish_draft/1,
-  renew_draft/2]).
+  renew_draft/2,
+  hide_draft/1]).
 
 
 -export([process_unsaved_changes/2, load_from_history/2]).
 
--record(state, {id, date_created, title, content, published, followUpId, changes=[]}).
+-record(state, {id, date_created, title, content, published, followUpId, hidden, changes=[]}).
 -define(PROCESS_TIME_OUT, 45000).
 
 -include("blog_data_structures.hrl").
@@ -38,6 +39,9 @@ unpublish_draft(Pid) ->
 
 renew_draft(Pid, FollowUpId) ->
   Pid ! {attempt_command, {renew_draft, FollowUpId}}.
+
+hide_draft(Pid) ->
+  Pid ! {attempt_command, {hide_draft}}.
 
 process_unsaved_changes(Pid, Saver) ->
   Pid ! {process_unsaved_changes, Saver}.
@@ -114,6 +118,12 @@ attempt_command({renew_draft, FollowUpId}, State) ->
   Event = #draft_renewed{id=Id, followUpId=FollowUpId},
   apply_new_event(Event, State);
 
+attempt_command({hide_draft}, State) ->
+  io:fwrite("attempting command: hide_draft !\n"),
+  Id    = State#state.id,
+  Event = #draft_hidden{id=Id},
+  apply_new_event(Event, State);
+
 attempt_command(Command, State) ->
   error_logger:warn_msg("attempt_command for unexpected command (~p)~n", [Command]),
   State.
@@ -166,6 +176,13 @@ apply_event(#draft_renewed{id=Id, followUpId=FollowUpId}, State) ->
   {
     State#state{id=Id, published=Id},
     #{"id"=>Id, "event_name"=>"draft_renewed", "event"=>#{<<"id">>=>list_to_binary(Id), <<"renewed">>=>atom_to_binary(true, utf8), <<"followUpId">>=>list_to_binary(FollowUpId)}}
+  };
+
+apply_event(#draft_hidden{id=Id}, State) ->
+  io:fwrite("applying event: draft_hidden!\n"),
+  {
+    State#state{id=Id, published=Id},
+    #{"id"=>Id, "event_name"=>"draft_hidden", "event"=>#{<<"id">>=>list_to_binary(Id), <<"hidden">>=>atom_to_binary(true, utf8)}}
   };
 
 apply_event(_Event, State)->
