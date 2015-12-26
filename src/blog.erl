@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start/1, make_new_draft/0, refine_title_of_draft/2, refine_content_of_draft/2, publish_draft/1, unpublish_draft/1]).
+-export([start/1, make_new_draft/0, refine_title_of_draft/2, refine_content_of_draft/2, publish_draft/1, unpublish_draft/1, renew_draft/1]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -51,6 +51,11 @@ unpublish_draft(Id) ->
   gen_server:cast(?MODULE, {unpublish_draft, Id}),
   ok.
 
+renew_draft(Id) ->
+  io:fwrite("renewing draft!\n"),
+  gen_server:cast(?MODULE, {renew_draft, Id}),
+  ok.
+
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 
@@ -72,14 +77,15 @@ handle_cast({publish_draft, Id}, State) ->
 
 handle_cast({unpublish_draft, Id}, State) ->
   command_bus:send_command(#unpublish_draft{id = Id}),
+  {noreply, State};
+
+handle_cast({renew_draft, Id}, State) ->
+  command_bus:send_command(#renew_draft{id = Id}),
   {noreply, State}.
 
 terminate(_Reason, _State) ->
   io:fwrite("Terminating blog\n"),
   ok.
-
-%version_draft() ->
-%    %creates a new version of a draft
 
 %remove_draft() ->
 %    %hide a draft

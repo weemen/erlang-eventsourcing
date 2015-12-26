@@ -21,6 +21,10 @@
   id
 }).
 
+-record(renew_draft,{
+  id
+}).
+
 %% Events
 -record(new_draft_made, {
   id,
@@ -43,4 +47,9 @@
 
 -record(draft_unpublished,{
   id
+}).
+
+-record(draft_renewed,{
+  id,
+  followUpId
 }).

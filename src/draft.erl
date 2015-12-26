@@ -1,9 +1,18 @@
 -module(draft).
 
--export([new/0, make_new_draft/2, refine_title_of_draft/2, refine_content_of_draft/2, publish_draft/1, unpublish_draft/1]).
+-export([
+  new/0,
+  make_new_draft/2,
+  refine_title_of_draft/2,
+  refine_content_of_draft/2,
+  publish_draft/1,
+  unpublish_draft/1,
+  renew_draft/2]).
+
+
 -export([process_unsaved_changes/2, load_from_history/2]).
 
--record(state, {id, date_created, title, content, published, changes=[]}).
+-record(state, {id, date_created, title, content, published, followUpId, changes=[]}).
 -define(PROCESS_TIME_OUT, 45000).
 
 -include("blog_data_structures.hrl").
@@ -26,6 +35,9 @@ publish_draft(Pid) ->
 
 unpublish_draft(Pid) ->
   Pid ! {attempt_command, {unpublish_draft}}.
+
+renew_draft(Pid, FollowUpId) ->
+  Pid ! {attempt_command, {renew_draft, FollowUpId}}.
 
 process_unsaved_changes(Pid, Saver) ->
   Pid ! {process_unsaved_changes, Saver}.
@@ -96,6 +108,12 @@ attempt_command({unpublish_draft}, State) ->
   Event = #draft_unpublished{id=Id},
   apply_new_event(Event, State);
 
+attempt_command({renew_draft, FollowUpId}, State) ->
+  io:fwrite("attempting command: renew_draft !\n"),
+  Id    = State#state.id,
+  Event = #draft_renewed{id=Id, followUpId=FollowUpId},
+  apply_new_event(Event, State);
+
 attempt_command(Command, State) ->
   error_logger:warn_msg("attempt_command for unexpected command (~p)~n", [Command]),
   State.
@@ -141,6 +159,13 @@ apply_event(#draft_unpublished{id=Id}, State) ->
   {
     State#state{id=Id, published=Id},
     #{"id"=>Id, "event_name"=>"draft_unpublished", "event"=>#{<<"id">>=>list_to_binary(Id), <<"published">>=>atom_to_binary(false, utf8)}}
+  };
+
+apply_event(#draft_renewed{id=Id, followUpId=FollowUpId}, State) ->
+  io:fwrite("applying event: draft_renewed!\n"),
+  {
+    State#state{id=Id, published=Id},
+    #{"id"=>Id, "event_name"=>"draft_renewed", "event"=>#{<<"id">>=>list_to_binary(Id), <<"renewed">>=>atom_to_binary(true, utf8), <<"followUpId">>=>list_to_binary(FollowUpId)}}
   };
 
 apply_event(_Event, State)->

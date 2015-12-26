@@ -58,6 +58,7 @@ handle_event(#publish_draft{id=Id}, State) ->
       io:fwrite("Id: ~s found!!\n", [Id]),
       draft:publish_draft(Pid),
       repository:save(Pid),
+      handle_event(#renew_draft{id=Id}, State),
       {ok, State}
   end;
 
@@ -69,6 +70,19 @@ handle_event(#unpublish_draft{id=Id}, State) ->
       io:fwrite("Id: ~s found!!\n", [Id]),
       draft:unpublish_draft(Pid),
       repository:save(Pid),
+      {ok, State}
+  end;
+
+handle_event(#renew_draft{id=Id}, State) ->
+  case repository:get_by_id(Id) of
+    not_found ->
+      handle_not_found(Id, State);
+    {ok,Pid} ->
+      io:fwrite("Id: ~s found!!\n", [Id]),
+      NewId = uuid:to_string(uuid:uuid4()),
+      draft:renew_draft(Pid, NewId),
+      repository:save(Pid),
+      handle_event(#make_new_draft{id=NewId}, State),
       {ok, State}
   end;
 
