@@ -102,13 +102,7 @@ apply_event(_Event, State)->
 apply_many_events([], State) ->
   State;
 
-apply_many_events([Event|Rest], State) ->
-  MappedEventRecord = maps:from_list(Event),
-
-  {_,MappedEvent} = maps:find(<<"event">>, MappedEventRecord),
-  {EventAsList}   = jiffy:decode(MappedEvent),
-  EventAsMap      = maps:from_list(EventAsList),
-
+apply_many_events([EventAsMap|Rest], State) ->
   NewState = apply_event_properties([
     {#state.id, <<"id">>},
     {#state.title, <<"title">>},
@@ -121,12 +115,7 @@ apply_event_properties([], State, _) ->
 
 apply_event_properties([StateFieldMap|Rest], State, Map) ->
   {StateField,MapKey} = StateFieldMap,
-
-  apply_event_properties(
-    Rest,
-    updating_state_from_applied_event(StateField, maps:find(MapKey, Map), State),
-    Map
-  ).
+  apply_event_properties(Rest, updating_state_from_applied_event(StateField, maps:find(MapKey, Map), State), Map).
 
 updating_state_from_applied_event(StateField, {ok, PropertyOfEvent}, State) ->
   setelement(StateField, State, binary_to_list(PropertyOfEvent));

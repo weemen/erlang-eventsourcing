@@ -57,7 +57,14 @@ get_events(Id) ->
     erlang_es_blog,
     Query
   ),
+  convertJsonToListOfMappedEvents(emysql_util:as_json(Result), []).
 
-  Proplist=emysql_util:as_json(Result),
-%%  io:fwrite("~p",[Proplist]),
-  Proplist.
+convertJsonToListOfMappedEvents([Event|Rest], ListEventMaps) ->
+  MappedEventRecord = maps:from_list(Event),
+  {_,MappedEvent}   = maps:find(<<"event">>, MappedEventRecord),
+  {EventAsList}     = jiffy:decode(MappedEvent),
+  NewListEventMaps  = lists:append(ListEventMaps,[maps:from_list(EventAsList)]),
+  convertJsonToListOfMappedEvents(Rest, NewListEventMaps);
+
+convertJsonToListOfMappedEvents([], ListEventMaps) ->
+  ListEventMaps.
