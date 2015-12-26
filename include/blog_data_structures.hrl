@@ -8,6 +8,11 @@
   title
 }).
 
+-record(refine_content_of_draft,{
+  id,
+  content
+}).
+
 %% Events
 -record(new_draft_made, {
   id,
@@ -17,4 +22,9 @@
 -record(title_of_draft_refined,{
   id,
   title
+}).
+
+-record(content_of_draft_refined,{
+  id,
+  content
 }).

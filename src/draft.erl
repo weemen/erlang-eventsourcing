@@ -1,9 +1,9 @@
 -module(draft).
 
--export([new/0, make_new_draft/2, refine_title_of_draft/2]).
+-export([new/0, make_new_draft/2, refine_title_of_draft/2, refine_content_of_draft/2]).
 -export([process_unsaved_changes/2, load_from_history/2]).
 
--record(state, {id, date_created, title, changes=[]}).
+-record(state, {id, date_created, title, content, changes=[]}).
 -define(PROCESS_TIME_OUT, 45000).
 
 -include("blog_data_structures.hrl").
@@ -16,8 +16,10 @@ make_new_draft(Pid, Id) ->
   Pid ! {attempt_command, {make_new_draft, Id}}.
 
 refine_title_of_draft(Pid, Title) ->
-  io:fwrite("sending message to draft process!\n"),
   Pid ! {attempt_command, {refine_title_of_draft, Title}}.
+
+refine_content_of_draft(Pid, Content) ->
+  Pid ! {attempt_command, {refine_content_of_draft, Content}}.
 
 process_unsaved_changes(Pid, Saver) ->
   Pid ! {process_unsaved_changes, Saver}.
@@ -70,6 +72,12 @@ attempt_command({refine_title_of_draft, Title}, State) ->
   Event = #title_of_draft_refined{id=Id, title=Title},
   apply_new_event(Event, State);
 
+attempt_command({refine_content_of_draft, Content}, State) ->
+  io:fwrite("attempting command: refine_content_of_draft !\n"),
+  Id    = State#state.id,
+  Event = #content_of_draft_refined{id=Id, content=Content},
+  apply_new_event(Event, State);
+
 attempt_command(Command, State) ->
   error_logger:warn_msg("attempt_command for unexpected command (~p)~n", [Command]),
   State.
@@ -96,6 +104,13 @@ apply_event(#title_of_draft_refined{id=Id, title=Title}, State) ->
     #{"id"=>Id, "event_name"=>"title_of_draft_refined", "event"=>#{<<"id">>=>list_to_binary(Id),<<"title">>=>list_to_binary(Title)}}
   };
 
+apply_event(#content_of_draft_refined{id=Id, content=Content}, State) ->
+  io:fwrite("applying event: content_of_draft_refined !\n"),
+  {
+    State#state{id=Id, content=Content},
+    #{"id"=>Id, "event_name"=>"content_of_draft_refined", "event"=>#{<<"id">>=>list_to_binary(Id),<<"content">>=>list_to_binary(Content)}}
+  };
+
 apply_event(_Event, State)->
   State. % For some events, we don't have state to mutate
 
@@ -106,6 +121,7 @@ apply_many_events([EventAsMap|Rest], State) ->
   NewState = apply_event_properties([
     {#state.id, <<"id">>},
     {#state.title, <<"title">>},
+    {#state.content, <<"content">>},
     {#state.date_created, <<"date_created">>}
   ], State, EventAsMap),
   apply_many_events(Rest, NewState).

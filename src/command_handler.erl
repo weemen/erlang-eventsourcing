@@ -31,8 +31,7 @@ handle_event(#make_new_draft{id=Id}, State) ->
 handle_event(#refine_title_of_draft{id=Id,title=Title}, State) ->
 	case repository:get_by_id(Id) of
 		not_found ->
-			io:fwrite("Id: ~s not found!!\n", [Id]),
-			{ok, State};
+			handle_not_found(Id, State);
 		{ok,Pid} ->
 			io:fwrite("Id: ~s found!!\n", [Id]),
 			draft:refine_title_of_draft(Pid, Title),
@@ -40,7 +39,22 @@ handle_event(#refine_title_of_draft{id=Id,title=Title}, State) ->
 			{ok, State}
 	end;
 
+handle_event(#refine_content_of_draft{id=Id,content=Content}, State) ->
+	case repository:get_by_id(Id) of
+		not_found ->
+			handle_not_found(Id, State);
+		{ok,Pid} ->
+			io:fwrite("Id: ~s found!!\n", [Id]),
+			draft:refine_content_of_draft(Pid, Content),
+			repository:save(Pid),
+			{ok, State}
+	end;
+
 handle_event(_, State) ->
+	{ok, State}.
+
+handle_not_found(Id, State) ->
+	io:fwrite("Id: ~s not found!!\n", [Id]),
 	{ok, State}.
 
 handle_call(_, State) ->
