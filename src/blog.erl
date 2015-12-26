@@ -80,12 +80,6 @@ terminate(_Reason, _State) ->
 
 %version_draft() ->
 %    %creates a new version of a draft
-%
-%publish_draft() ->
-%    %publish stuff and make copy current draft
-%
-%unpublish_draft() ->
-%    %mark draft as unpublished
-%
+
 %remove_draft() ->
 %    %hide a draft
