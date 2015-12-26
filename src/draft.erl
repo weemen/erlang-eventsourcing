@@ -102,28 +102,34 @@ apply_event(_Event, State)->
 apply_many_events([], State) ->
   State;
 
-%%TODO this code should be cleanend up to reduce redundency
 apply_many_events([Event|Rest], State) ->
   MappedEventRecord = maps:from_list(Event),
 
-  case maps:find(<<"event_name">>,MappedEventRecord) of
-    {ok, <<"new_draft_made">>} ->
-      {_,MappedEvent} = maps:find(<<"event">>, MappedEventRecord),
-      {EventAsList}   = jiffy:decode(MappedEvent),
-      EventAsMap      = maps:from_list(EventAsList),
+  {_,MappedEvent} = maps:find(<<"event">>, MappedEventRecord),
+  {EventAsList}   = jiffy:decode(MappedEvent),
+  EventAsMap      = maps:from_list(EventAsList),
 
-      {_,Id}          = maps:find(<<"id">>,EventAsMap),
-      {_,DateCreated} = maps:find(<<"date_created">>,EventAsMap),
-
-      repository:add_to_cache(binary_to_list(Id)),
-      NewState = State#state{id=binary_to_list(Id), date_created=binary_to_list(DateCreated)};
-
-    {ok, <<"title_of_draft_refined">>} ->
-      {_,MappedEvent} = maps:find(<<"event">>, MappedEventRecord),
-      {EventAsList}   = jiffy:decode(MappedEvent),
-      EventAsMap      = maps:from_list(EventAsList) ,
-
-      {_,Title}          = maps:find(<<"title">>,EventAsMap),
-      NewState = State#state{title=binary_to_list(Title)}
-  end,
+  NewState = apply_event_properties([
+    {#state.id, <<"id">>},
+    {#state.title, <<"title">>},
+    {#state.date_created, <<"date_created">>}
+  ], State, EventAsMap),
   apply_many_events(Rest, NewState).
+
+apply_event_properties([], State, _) ->
+  State;
+
+apply_event_properties([StateFieldMap|Rest], State, Map) ->
+  {StateField,MapKey} = StateFieldMap,
+
+  apply_event_properties(
+    Rest,
+    updating_state_from_applied_event(StateField, maps:find(MapKey, Map), State),
+    Map
+  ).
+
+updating_state_from_applied_event(StateField, {ok, PropertyOfEvent}, State) ->
+  setelement(StateField, State, binary_to_list(PropertyOfEvent));
+
+updating_state_from_applied_event(_, _, State) ->
+  State.
