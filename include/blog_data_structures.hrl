@@ -13,6 +13,14 @@
   content
 }).
 
+-record(publish_draft,{
+  id
+}).
+
+-record(unpublish_draft,{
+  id
+}).
+
 %% Events
 -record(new_draft_made, {
   id,
@@ -27,4 +35,12 @@
 -record(content_of_draft_refined,{
   id,
   content
+}).
+
+-record(draft_published,{
+  id
+}).
+
+-record(draft_unpublished,{
+  id
 }).

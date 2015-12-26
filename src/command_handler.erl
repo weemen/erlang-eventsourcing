@@ -50,6 +50,28 @@ handle_event(#refine_content_of_draft{id=Id,content=Content}, State) ->
 			{ok, State}
 	end;
 
+handle_event(#publish_draft{id=Id}, State) ->
+  case repository:get_by_id(Id) of
+    not_found ->
+      handle_not_found(Id, State);
+    {ok,Pid} ->
+      io:fwrite("Id: ~s found!!\n", [Id]),
+      draft:publish_draft(Pid),
+      repository:save(Pid),
+      {ok, State}
+  end;
+
+handle_event(#unpublish_draft{id=Id}, State) ->
+  case repository:get_by_id(Id) of
+    not_found ->
+      handle_not_found(Id, State);
+    {ok,Pid} ->
+      io:fwrite("Id: ~s found!!\n", [Id]),
+      draft:unpublish_draft(Pid),
+      repository:save(Pid),
+      {ok, State}
+  end;
+
 handle_event(_, State) ->
 	{ok, State}.
 

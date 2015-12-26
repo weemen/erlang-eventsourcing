@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start/1, make_new_draft/0, refine_title_of_draft/2, refine_content_of_draft/2]).
+-export([start/1, make_new_draft/0, refine_title_of_draft/2, refine_content_of_draft/2, publish_draft/1, unpublish_draft/1]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -41,6 +41,16 @@ refine_content_of_draft(Id, Content) ->
   gen_server:cast(?MODULE, {refine_content_of_draft, Id, Content}),
   ok.
 
+publish_draft(Id) ->
+  io:fwrite("publishing draft!\n"),
+  gen_server:cast(?MODULE, {publish_draft, Id}),
+  ok.
+
+unpublish_draft(Id) ->
+  io:fwrite("unpublishing draft!\n"),
+  gen_server:cast(?MODULE, {unpublish_draft, Id}),
+  ok.
+
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 
@@ -54,6 +64,14 @@ handle_cast({refine_title_of_draft, Id, Title}, State) ->
 
 handle_cast({refine_content_of_draft, Id, Content}, State) ->
   command_bus:send_command(#refine_content_of_draft{id = Id, content=Content}),
+  {noreply, State};
+
+handle_cast({publish_draft, Id}, State) ->
+  command_bus:send_command(#publish_draft{id = Id}),
+  {noreply, State};
+
+handle_cast({unpublish_draft, Id}, State) ->
+  command_bus:send_command(#unpublish_draft{id = Id}),
   {noreply, State}.
 
 terminate(_Reason, _State) ->

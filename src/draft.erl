@@ -1,9 +1,9 @@
 -module(draft).
 
--export([new/0, make_new_draft/2, refine_title_of_draft/2, refine_content_of_draft/2]).
+-export([new/0, make_new_draft/2, refine_title_of_draft/2, refine_content_of_draft/2, publish_draft/1, unpublish_draft/1]).
 -export([process_unsaved_changes/2, load_from_history/2]).
 
--record(state, {id, date_created, title, content, changes=[]}).
+-record(state, {id, date_created, title, content, published, changes=[]}).
 -define(PROCESS_TIME_OUT, 45000).
 
 -include("blog_data_structures.hrl").
@@ -20,6 +20,12 @@ refine_title_of_draft(Pid, Title) ->
 
 refine_content_of_draft(Pid, Content) ->
   Pid ! {attempt_command, {refine_content_of_draft, Content}}.
+
+publish_draft(Pid) ->
+  Pid ! {attempt_command, {publish_draft}}.
+
+unpublish_draft(Pid) ->
+  Pid ! {attempt_command, {unpublish_draft}}.
 
 process_unsaved_changes(Pid, Saver) ->
   Pid ! {process_unsaved_changes, Saver}.
@@ -78,6 +84,18 @@ attempt_command({refine_content_of_draft, Content}, State) ->
   Event = #content_of_draft_refined{id=Id, content=Content},
   apply_new_event(Event, State);
 
+attempt_command({publish_draft}, State) ->
+  io:fwrite("attempting command: publish_draft !\n"),
+  Id    = State#state.id,
+  Event = #draft_published{id=Id},
+  apply_new_event(Event, State);
+
+attempt_command({unpublish_draft}, State) ->
+  io:fwrite("attempting command: unpublish_draft !\n"),
+  Id    = State#state.id,
+  Event = #draft_unpublished{id=Id},
+  apply_new_event(Event, State);
+
 attempt_command(Command, State) ->
   error_logger:warn_msg("attempt_command for unexpected command (~p)~n", [Command]),
   State.
@@ -94,7 +112,7 @@ apply_event(#new_draft_made{id=Id,date_created=DateCreated}, State) ->
   repository:add_to_cache(Id),
   {
     State#state{id=Id, date_created=DateCreated},
-    #{"id"=>Id, "event_name"=>"new_draft_made", "event"=>#{<<"id">>=>list_to_binary(Id),<<"date_created">>=>list_to_binary(DateCreated)}}
+    #{"id"=>Id, "event_name"=>"new_draft_made", "event"=>#{<<"id">>=>list_to_binary(Id),<<"date_created">>=>list_to_binary(DateCreated), <<"published">>=>atom_to_binary(false, utf8)}}
   };
 
 apply_event(#title_of_draft_refined{id=Id, title=Title}, State) ->
@@ -109,6 +127,20 @@ apply_event(#content_of_draft_refined{id=Id, content=Content}, State) ->
   {
     State#state{id=Id, content=Content},
     #{"id"=>Id, "event_name"=>"content_of_draft_refined", "event"=>#{<<"id">>=>list_to_binary(Id),<<"content">>=>list_to_binary(Content)}}
+  };
+
+apply_event(#draft_published{id=Id}, State) ->
+  io:fwrite("applying event: draft_published !\n"),
+  {
+    State#state{id=Id, published=Id},
+    #{"id"=>Id, "event_name"=>"draft_published", "event"=>#{<<"id">>=>list_to_binary(Id), <<"published">>=>atom_to_binary(true, utf8)}}
+  };
+
+apply_event(#draft_unpublished{id=Id}, State) ->
+  io:fwrite("applying event: draft_unpublished !\n"),
+  {
+    State#state{id=Id, published=Id},
+    #{"id"=>Id, "event_name"=>"draft_unpublished", "event"=>#{<<"id">>=>list_to_binary(Id), <<"published">>=>atom_to_binary(false, utf8)}}
   };
 
 apply_event(_Event, State)->
