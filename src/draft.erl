@@ -196,7 +196,10 @@ apply_many_events([EventAsMap|Rest], State) ->
     {#state.id, <<"id">>},
     {#state.title, <<"title">>},
     {#state.content, <<"content">>},
-    {#state.date_created, <<"date_created">>}
+    {#state.date_created, <<"date_created">>},
+    {#state.published, <<"published">>},
+    {#state.followUpId, <<"followUpId">>},
+    {#state.hidden, <<"hidden">>}
   ], State, EventAsMap),
   apply_many_events(Rest, NewState).
 
