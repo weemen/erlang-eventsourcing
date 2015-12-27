@@ -100,7 +100,7 @@ attempt_command({refine_content_of_draft, Content}, State) ->
   Event = #content_of_draft_refined{id=Id, content=Content},
   apply_new_event(Event, State);
 
-attempt_command({publish_draft}, State) ->
+attempt_command({publish_draft}, State) when State#state.published == false ->
   io:fwrite("attempting command: publish_draft !\n"),
   Id    = State#state.id,
   Event = #draft_published{id=Id},
