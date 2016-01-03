@@ -55,10 +55,18 @@ handle_event(#publish_draft{id=Id}, State) ->
     not_found ->
       handle_not_found(Id, State);
     {ok,Pid} ->
-      io:fwrite("Id: ~s found!!\n", [Id]),
+      io:fwrite("Id: ~s found!!~n", [Id]),
+      Ref = erlang:monitor(process, Pid),
+      receive
+        {'DOWN', Ref, _, _, _} ->
+          ok;
+        _ ->
+          repository:save(Pid),
+          handle_event(#renew_draft{id=Id}, State)
+      end,
+
       draft:publish_draft(Pid),
-      repository:save(Pid),
-      handle_event(#renew_draft{id=Id}, State),
+      erlang:demonitor(Ref),
       {ok, State}
   end;
 

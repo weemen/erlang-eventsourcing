@@ -20,7 +20,12 @@
 
 %% API
 new() ->
-  spawn(fun() -> init() end).
+  spawn(
+    fun() ->
+      init(),
+      process_flag(trap_exit, true)
+    end
+  ).
 
 make_new_draft(Pid, Id) ->
   Pid ! {attempt_command, {make_new_draft, Id}}.
