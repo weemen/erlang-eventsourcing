@@ -58,7 +58,6 @@ handle_event(#publish_draft{id=Id}, State) ->
       io:fwrite("Id: ~s found!!\n", [Id]),
       draft:publish_draft(Pid),
       repository:save(Pid),
-      handle_event(#renew_draft{id=Id}, State),
       {ok, State}
   end;
 

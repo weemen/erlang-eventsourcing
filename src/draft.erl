@@ -109,7 +109,9 @@ attempt_command({publish_draft}, State) when State#state.published == false ->
   io:fwrite("attempting command: publish_draft !\n"),
   Id    = State#state.id,
   Event = #draft_published{id=Id},
-  apply_new_event(Event, State);
+  RenewEvent = #draft_renewed{id=Id, followUpId=uuid:to_string(uuid:uuid4())},
+  apply_new_event(Event, State),
+  apply_new_event(RenewEvent, State);
 
 attempt_command({unpublish_draft}, State) ->
   io:fwrite("attempting command: unpublish_draft !\n"),
