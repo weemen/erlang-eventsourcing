@@ -125,7 +125,7 @@ attempt_command({renew_draft, FollowUpId}, State) ->
   Event = #draft_renewed{id=Id, followUpId=FollowUpId},
   apply_new_event(Event, State);
 
-attempt_command({hide_draft}, State) ->
+attempt_command({hide_draft}, State) when State#state.hidden == false ->
   io:fwrite("attempting command: hide_draft !\n"),
   Id    = State#state.id,
   Event = #draft_hidden{id=Id},
@@ -147,7 +147,7 @@ apply_event(#new_draft_made{id=Id,date_created=DateCreated}, State) ->
   repository:add_to_cache(Id),
   {
     State#state{id=Id, date_created=DateCreated},
-    #{"id"=>Id, "event_name"=>"new_draft_made", "event"=>#{<<"id">>=>list_to_binary(Id),<<"date_created">>=>list_to_binary(DateCreated), <<"published">>=>atom_to_binary(false, utf8)}}
+    #{"id"=>Id, "event_name"=>"new_draft_made", "event"=>#{<<"id">>=>list_to_binary(Id),<<"date_created">>=>list_to_binary(DateCreated), <<"published">>=>atom_to_binary(false, utf8), <<"hidden">>=>atom_to_binary(false, utf8)}}
   };
 
 apply_event(#title_of_draft_refined{id=Id, title=Title}, State) ->
