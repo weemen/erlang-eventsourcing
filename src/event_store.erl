@@ -6,10 +6,8 @@
 -include("blog_data_structures.hrl").
 
 -export([init/0,get_events/1,append_events/1]).
--define(TABLE_ID, ?MODULE).
 
 init() ->
-  ets:new(?TABLE_ID, [public, named_table]),
   ok.
 
 append_events(Events) ->
@@ -43,7 +41,7 @@ append_events(Events) ->
       erlang_es_blog,
       Query
     ),
-    command_bus:publish_event(maps:get("event", EventRecord)) end, NewEvents
+    command_bus:publish_event(maps:get("event_name", EventRecord), maps:get("event", EventRecord)) end, NewEvents
   ).
 
 get_events(Id) ->
