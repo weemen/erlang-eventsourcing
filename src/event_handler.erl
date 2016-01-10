@@ -8,6 +8,13 @@
 -export([init/1, handle_event/2, handle_call/2,
   handle_info/2, code_change/3, terminate/2]).
 
+
+%%new_draft_made
+%%title_of_draft_refined
+%%content_of_draft_refined
+%%draft_published
+%%draft_renewed
+
 add_handler() ->
   command_bus:add_handler(?MODULE, []).
 
@@ -17,8 +24,12 @@ delete_handler() ->
 init([]) ->
   {ok, []}.
 
-handle_event(_ = Event, State) ->
-  %rabbitmq shit here
+
+handle_event({EventName, Event}, State) when EventName == "new_draft_made" ->
+  projection_refinements_per_blogitem:process_event({EventName, Event}),
+  {ok, State};
+
+handle_event({_,_}, State) ->
   {ok, State}.
 
 handle_call(_, State) ->
