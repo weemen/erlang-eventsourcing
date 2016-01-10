@@ -6,4 +6,6 @@
               {mod,{blog_app,[]}},
               {env,[]},
               {modules,[blog,blog_app,blog_sup,command_bus,command_handler,
-                        draft,event_handler,event_store,keypid,repository]}]}.
+                        draft,event_handler,event_store,keypid,
+                        projection_refinements_per_blogitem,read_store,
+                        repository]}]}.
