@@ -3,7 +3,7 @@
 %% The EventManager for our app
 
 -export([start_link/0, add_handler/2, delete_handler/2, send_command/1,
-	publish_event/1]).
+	publish_event/2]).
 
 -define(SERVER, ?MODULE).
 
@@ -20,5 +20,5 @@ delete_handler(Handler, Args) ->
 send_command(Command) ->
 	gen_event:notify(?SERVER, Command).
 
-publish_event(Event) ->
-    gen_event:notify(?SERVER, Event).
+publish_event(EventName, Event) ->
+    gen_event:notify(?SERVER, {EventName, Event}).
