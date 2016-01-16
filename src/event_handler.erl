@@ -26,10 +26,24 @@ init([]) ->
 
 
 handle_event({EventName, Event}, State) when EventName == "new_draft_made" ->
+  io:fwrite('Event handler: ~p~n',[EventName]),
+  projection_refinements_per_blogitem:process_event({EventName, Event}),
+  {ok, State};
+
+handle_event({EventName, Event}, State)
+  when
+    EventName == "title_of_draft_refined";
+    EventName == "content_of_draft_refined" ->
+  io:fwrite('Event handler: ~p~n',[EventName]),
   projection_refinements_per_blogitem:process_event({EventName, Event}),
   {ok, State};
 
 handle_event({_,_}, State) ->
+  io:fwrite('Event handler: oops~n',[]),
+  {ok, State};
+
+handle_event(_, State) ->
+  io:fwrite('Event handler: ignore it, unknown format. Message probably not for me~n',[]),
   {ok, State}.
 
 handle_call(_, State) ->
