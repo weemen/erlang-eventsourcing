@@ -11,14 +11,14 @@
 
 start(_StartType, _StartArgs) ->
     event_store:init(),
-%%    read_store:init(),
+    read_store:init(),
     keypid:init(),
 
     case blog_sup:start_link() of
         {ok, Pid} ->
             io:fwrite("supervisor started\n"),
             command_handler:add_handler(),
-%%            event_handler:add_handler(),
+            event_handler:add_handler(),
             io:fwrite("handler added to command handler\n"),
             {ok, Pid};
         Other ->
