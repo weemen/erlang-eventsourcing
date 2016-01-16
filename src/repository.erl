@@ -28,7 +28,9 @@ load_from_event_store(Id) ->
     [] ->
       not_found;
     Events ->
+      io:fwrite("Events from event store loaded!~n"),
       Pid = draft:new(),
+      keypid:save(Id,Pid),
       draft:load_from_history(Pid, Events),
       {ok, Pid}
   end.
