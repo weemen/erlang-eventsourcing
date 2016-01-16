@@ -21,4 +21,5 @@ send_command(Command) ->
 	gen_event:notify(?SERVER, Command).
 
 publish_event(EventName, Event) ->
-    gen_event:notify(?SERVER, {EventName, Event}).
+  io:fwrite('Publishing event: ~p with content: ~p~n',[EventName, Event]),
+  gen_event:notify(?SERVER, {EventName, Event}).
