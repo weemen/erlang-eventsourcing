@@ -9,10 +9,9 @@ init() ->
 
 setup_refinement_for_blogitem(Uuid) ->
   Query = erlang:iolist_to_binary(
-    io_lib:format("INSERT INTO refinements_per_blogitem SET uuid = ~p, count = '~s'",
+    io_lib:format("INSERT INTO refinements_per_blogitem (uuid, count) VALUES (~p,0)",
       [
-        Uuid,
-        0
+        Uuid
       ])
   ),
 
@@ -31,8 +30,10 @@ update_refinement_for_blogitem(Uuid) ->
   Record       = maps:from_list(lists:nth(1, ResultAsJson)),
   {_,Count}    = maps:find(<<"count">>, Record),
 
+  io:fwrite("Mysql: UPDATE refinements_per_blogitem SET count = ~p WHERE uuid = ~p~n", [(Count+1), Uuid]),
+
   Query = erlang:iolist_to_binary(
-    io_lib:format("UPDATE setup_refinement_for_blogitem SET count = ~p WHERE uuid = ~p",
+    io_lib:format("UPDATE refinements_per_blogitem SET count = ~p WHERE uuid = ~p",
       [
         (Count+1),
         Uuid
