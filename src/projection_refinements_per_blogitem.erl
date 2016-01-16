@@ -18,7 +18,7 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 process_event(Event) ->
-  %% error_logger:info_msg("Projection process_event: ~p.~n", [Event]),
+  %error_logger:info_msg("Projection process_event: ~p.~n", [Event]),
   gen_server:cast(?SERVER, Event).
 
 %% gen_server Function Definitions
@@ -30,19 +30,27 @@ init([]) ->
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 
-handle_cast({EventName, Event}, Details) when EventName == "new_draft_made" ->
-  {EventAsList} = jiffy:decode(EventName),
-  [maps:from_list(EventAsList)],
+handle_cast({EventName, Event}, State) when EventName == "new_draft_made" ->
+  io:fwrite('Projection :~p with eventname ~p~n',[?MODULE, EventName]),
+  read_store:setup_refinement_for_blogitem(
+    binary_to_list(maps:get(<<"id">>,Event))
+  ),
+  {noreply,State};
 
-  update_read_store(Event),
-  {noreply,ok};
+handle_cast({EventName, Event}, State) when EventName == "title_of_draft_refined" ->
+  io:fwrite('Projection :~p with eventname ~p~n',[?MODULE, EventName]),
+  read_store:update_refinement_for_blogitem(
+    binary_to_list(maps:get(<<"id">>,Event))
+  ),
+  {noreply,State};
+
+handle_cast({EventName, _}, State) ->
+  io:fwrite('Projection :~p with unknown eventname ~p~n',[?MODULE, EventName]),
+  {noreply,State};
 
 handle_cast(_Msg, State) ->
+  io:fwrite('Whoops: ~p~n',[_Msg]),
   {noreply, State}.
-
-update_read_store(Details) ->
-  {reply, ok, ok}.
-%%  bank_read_store:set_bank_account_details(dict:to_list(Details)).
 
 handle_info(_Info, State) ->
   {noreply, State}.
