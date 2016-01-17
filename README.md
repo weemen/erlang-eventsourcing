@@ -29,8 +29,7 @@ What I need now is feedback, feedback to upgrade my erlang skills.
 - Maybe someone can point me to great resources where I can learn from.
 - Can I make better use of pattern matching?
 - Is my code (not) function enough?
-- 
-etc all kinds tips & tricks are welcome!
+- etc all kinds tips & tricks are welcome!
 
 Getting started
 =======
