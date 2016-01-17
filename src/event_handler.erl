@@ -24,14 +24,9 @@ delete_handler() ->
 init([]) ->
   {ok, []}.
 
-
-handle_event({EventName, Event}, State) when EventName == "new_draft_made" ->
-  io:fwrite('Event handler: ~p~n',[EventName]),
-  projection_refinements_per_blogitem:process_event({EventName, Event}),
-  {ok, State};
-
 handle_event({EventName, Event}, State)
   when
+    EventName == "new_draft_made";
     EventName == "title_of_draft_refined";
     EventName == "content_of_draft_refined" ->
   io:fwrite('Event handler: ~p~n',[EventName]),
