@@ -8,7 +8,7 @@ What did I do:
 I took a project from Brian Hunter (https://github.com/bryanhunter/cqrs-with-erlang/tree/ndc-oslo) which was a part of this talk https://vimeo.com/97318824.
 This was a good base to make changes on:
  
-- Swapped ETS to MySQL as eventstore to make my event persistent. (This was actually a lot work)
+- Swapped ETS to MySQL as eventstore to make my events persistent. (This was actually a lot work)
 
 
 - Stored all events as JSON in MySQL.
