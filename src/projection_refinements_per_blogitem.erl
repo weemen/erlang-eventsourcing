@@ -37,7 +37,10 @@ handle_cast({EventName, Event}, State) when EventName == "new_draft_made" ->
   ),
   {noreply,State};
 
-handle_cast({EventName, Event}, State) when EventName == "title_of_draft_refined" ->
+handle_cast({EventName, Event}, State)
+  when
+    EventName == "title_of_draft_refined";
+    EventName == "content_of_draft_refined" ->
   io:fwrite('Projection :~p with eventname ~p~n',[?MODULE, EventName]),
   read_store:update_refinement_for_blogitem(
     binary_to_list(maps:get(<<"id">>,Event))
