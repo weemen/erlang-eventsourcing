@@ -5,8 +5,7 @@ I've tried to build an event-sourced application with mysql as eventstore.
 
 What did I do:
 =======
-I took a project from Brian Hunter (https://github.com/bryanhunter/cqrs-with-erlang/tree/ndc-oslo) which was a part of this talk https://vimeo.com/97318824.
-This was a good base to make changes on:
+I took a project from Brian Hunter (https://github.com/bryanhunter/cqrs-with-erlang/tree/ndc-oslo) which was a part of this talk https://vimeo.com/97318824. It looked like a good base to make changes on so I...
  
 - Swapped ETS to MySQL as eventstore to make my events persistent. (This was actually a lot work)
 
@@ -26,12 +25,35 @@ a php application it sounded like a good idea to store everything in JSON. I'm n
 Feedback
 ========
 What I need now is feedback, feedback to upgrade my erlang skills. 
-One of the things I noticed was that if I want to add a new event I have to change code on many places. Is this normal?
-Maybe someone can point me to great resources where I can learn from.
+- One of the things I noticed was that if I want to add a new event I have to change code on many places. Is this normal?
+- Maybe someone can point me to great resources where I can learn from.
+- Can I make better use of pattern matching?
+- Is my code (not) function enough?
+- 
+etc all kinds tips & tricks are welcome!
 
 Getting started
 =======
 
+Setup Mysql:
+```
+CREATE TABLE `events` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `event` mediumtext NOT NULL,
+  `event_name` varchar(250) DEFAULT NULL,
+  `processed_date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=114 DEFAULT CHARSET=latin1; 
+
+CREATE TABLE `refinements_per_blogitem` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+```
+The project:
 ```
 git clone https://github.com/weemen/erlang-eventsourcing.git
 rebar get-deps
@@ -46,7 +68,7 @@ emysql:add_pool(erlang_es_blog, [{size,1},
 application:start(blog).
 ```
 
-
+The commands you can execute, note uuids are different in your application!
 ```
 blog:make_new_draft().
 blog:refine_title_of_draft("21d84c10-30b0-4bf6-9c3d-b308c8c15afc","some title 27").
@@ -65,3 +87,4 @@ Things still todo
 - There is no real playhead functionality so events might still collide with each other.
 - Mysql should be started out of the box
 - Create decent log message instead of io:fwrite.
+- Create something like a db migration file
