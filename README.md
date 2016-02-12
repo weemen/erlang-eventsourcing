@@ -28,8 +28,8 @@ What I need now is feedback, feedback to upgrade my erlang skills.
 - One of the things I noticed was that if I want to add a new event I have to change code on many places. Is this normal?
 - Maybe someone can point me to great resources where I can learn from.
 - Can I make better use of pattern matching?
-- Is my code (not) function enough?
-- etc all kinds tips & tricks are welcome!
+- Is my code (not) functional enough?
+- etc all kinds of tips & tricks are welcome!
 
 Getting started
 =======
